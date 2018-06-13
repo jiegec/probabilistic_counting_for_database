@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[backend=bibtex8]{biblatex}
 \usepackage{amsmath}
-\usepackage[]{algorithm2e}
+\usepackage[linesnumbered,lined,boxed]{algorithm2e}
 
 \newtheorem{definition}{\hspace{2em} 定义}[subsection]
 \newtheorem{property}{\hspace{2em} 性质}[subsection]
@@ -28,7 +28,7 @@
     获取数据库中一个列中所有数据中相异元素的个数在许多地方有应用。通过获取这个数据，可以反映出数据的一些特征，针对该特征，数据库开发者可以根据这个特性进行优化。\cite{Whang:1990ei} 在数学上，由于数据库分布式地存储在不同的机器上，这个问题可以转化为：
     \begin{enumerate}
         \item 记我们要统计的所有数据的多重集合为 $M$ 。存储在机器 $i$ 上为多重集合 $M$ 的多重子集 $M_i$ 。
-        \item 在每台机器上分别对 $M_i$ 进行处理，将处理结果统一到一台机器，在该机器上对 $\left|M\right|$ 进行估计，即该多重集合中相异元素的个数 $\hat{n}$。
+        \item 在每台机器上分别对 $M_i$ 进行处理，将处理结果统一到一台机器，在该机器上对 $\left|M\right|$ 进行估计，即该多重集合中相异元素的个数 $n$ ，记估计值为 $\hat{n}$。
     \end{enumerate}
 
     容易想出解决这个问题的算法，假设只有两个多重子集 $A$ $B$ \cite{Whang:1990ei}：
@@ -104,7 +104,7 @@
         \end{align*}
     \end{definition}
 
-    可以观察到，由于哈希的均匀分布，我们知道 $\mathrm{\rho}(y)$ 为指数分布。对不同的 $\mathrm{\rho}(y)$ 进行统计，我们得到如下 PC 算法：
+    可以观察到，由于哈希的均匀分布，我们知道 $\mathrm{\rho}(y)$ 为指数分布。对不同的 $\mathrm{\rho}(y)$ 进行统计，我们可以得到 PC 算法。
 
     \begin{algorithm}
         \SetKwData{Bitmap}{BITMAP}
@@ -122,9 +122,13 @@
                 \Bitmap $\left[index\right] \leftarrow 1$\;
             }
         }
-        $\hat{n} \leftarrow \log_2(\phi n)$ where $n$ is the position of the leftmost zero in \Bitmap and $\phi$ is a constant equal to $0.77351 \cdots$.
+        $n \leftarrow$ the position of the leftmost zero in \Bitmap \;
+        $\phi \leftarrow 0.77351 \cdots$ \;
+        $\hat{n} \leftarrow \log_2(\phi n)$ \;
         \caption{Probablistic Counting}
     \end{algorithm}
+
+    由于哈希函数的分布特性，$BITMAP[0]$ 被更新的期望为 $n$, $BITMAP[1]$ 被更新的期望为 $n / 2$，故我们采用 $BITMAP$ 中最左边一个为 $0$ 的位的位置来估计 $\log_2(n)$ ，并且进行常数的修正，作为 $n$ 的估计值。
 
 \printbibliography[title=引用文献]
 
