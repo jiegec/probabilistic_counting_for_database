@@ -9,7 +9,7 @@
 \newtheorem{property}{\hspace{2em} 性质}[subsection]
 \newtheorem{corollary}{\hspace{2em} 引理}[subsection]
 
-\title{基于概率的数据库计数算法}
+\title{数据库中基于概率的计数算法}
 \author{陈嘉杰 \\ 计72 2017011484}
 \date{2018 年 6 月}
 \bibliography{ref.bib}
@@ -81,9 +81,9 @@
 
     通过这一步操作，我们获得了便于处理的二进制数据，也提供了一些概率上的性质。
 
-\subsection{PC（Probablisitic Counting） 算法 \cite{Flajolet:1985ixa}}
+\subsection{Flajolet-Martin 算法 \cite{Flajolet:1985ixa}}
 
-    1985 年，Philippe Flajolet 提出了基于概率的简易计数算法，我们称之为 PC（Probablistic Counting）算法，并通过随机平均（stochastic averaging）提出了改进，为 PCSA（Probablistic Counting with Stochastic Averaging），允许根据需要增加计算量，从而缩小估计值的标准差。
+    1985 年，Philippe Flajolet 提出了基于概率的简易计数算法，文中称之为 PC（Probablistic Counting）算法，并通过随机平均（stochastic averaging）提出了改进，为 PCSA（Probablistic Counting with Stochastic Averaging），允许根据需要增加计算量，从而缩小估计值的标准差。
 
     首先定义函数 $\mathrm{bit}(y,k)$ 和 $\mathrm{\rho}(y)$ ：
 
@@ -122,9 +122,9 @@
                 \Bitmap $\left[index\right] \leftarrow 1$\;
             }
         }
-        $n \leftarrow$ the position of the leftmost zero in \Bitmap \;
+        $R \leftarrow$ the position of the leftmost zero in \Bitmap \;
         $\phi \leftarrow 0.77351 \cdots$ \;
-        $\hat{n} \leftarrow \log_2(\phi n)$ \;
+        $\hat{n} \leftarrow 2^R/\phi$ \;
         \caption{Probablistic Counting}
     \end{algorithm}
 
@@ -132,9 +132,20 @@
 
     我们不加证明地给出，$\sigma(R) \approx 1.12$ 。详细证明见 \cite{Flajolet:1985ixa} 。
 
+    虽然以上的伪代码中对整体的 $M$ 的每个元素顺序执行，但实践中可以将 $M$ 分拆，在各个机器上分别对 $M_i$ 统计出各自的 $BITMAP$ ，最终，将各个 $BITMAP$ 中的值合并，最后即可得到结果。代码中的 $\phi$ 由以下等式给出：
+
+    \begin{equation*}
+        \phi = 2^{-1/2}e^{\gamma}\frac23\prod_{p=1}^{\infty}\left[\frac{(4p+1)(4p+2)}{(4p)(4p+3)}\right]^{(-1)^{\mathrm{v}(p)}} \approx 0.77351 \ldots
+    \end{equation*}
+
+    其中 $\mathrm{v}(p)$ 为 $p$ 的二进制表示中 $1$ 的个数。
+
 \subsubsection{PCSA（Probablistic Counting Stochastic Averaging） 算法}
 
     为了进一步缩小标准差，使得我们的估计能够更加接近精确值，通过采用不同的哈希函数，分别求出对应的 $\hat{n}_i$ ，并且取 $\hat{n} = \frac{\sum_{i=1}^m{\hat{n}_i}}{m}$ 为估计值，那么，标准差变为 $\sigma(R) \approx \frac{1.12}{\sqrt{m}}$ 。这样，通过 Stochastic Averaging（随机平均）的方法，我们可以通过改变 $m$ 使得我们可以进一步控制估计的标准差。
+
+\subsubsection{评价}
+    这篇论文是这个领域的开山之作，提出了基于哈希的估计算法，这个思想也被后来的许多相似算法提供了基础。它很容易分布式执行，运行速度也很快。但这个算法也有它的局限性：单次运行 PC 算法，所得结果必然为 $2^R/\phi$ 的形式，随机性较大，必须通过多次运行取不同结果的平均值作为最终的估计。
 
 \printbibliography[title=引用文献]
 
