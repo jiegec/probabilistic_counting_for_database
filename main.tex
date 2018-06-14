@@ -147,6 +147,46 @@
 \subsubsection{评价}
     这篇论文是这个领域的开山之作，提出了基于哈希的估计算法，这个思想也被后来的许多相似算法提供了基础。它很容易分布式执行，运行速度也很快。但这个算法也有它的局限性：单次运行 PC 算法，所得结果必然为 $2^R/\phi$ 的形式，随机性较大，必须通过多次运行取不同结果的平均值作为最终的估计。
 
+\subsection{Linear Counting 算法 \cite{Whang:1990ei}}
+    1990年，Kyu-Young Whang, Brad T. Vander-Zanden 和 Howard M. Taylor 提出了 Linear Counting 算法。这个算法和上面的 Flajolet-Martin 算法有相同之处，它也采用了哈希的算法，不同的是，它采用的是哈希碰撞的次数来对相异元素个数进行最大似然估计。
+
+    算法首先创建一个 $m$ 位的位图，然后将每个元素的哈希值对应的位取为 1 。然后，统计 0 的个数，代入公式得到最终的估计。
+
+    \begin{algorithm}
+        \SetKwData{Bitmap}{Bitmap}
+        \SetKwData{HashValue}{hash\_value}
+        \SetKwInOut{Input}{input}
+        \SetKwInOut{Output}{output}
+        \Input{the multiset $M$ whose cardinality is sought}
+        \Output{the estimated $\hat{n}$}
+        \BlankLine
+        \For{$i \leftarrow 0$ \KwTo $m$ } {
+            \Bitmap $[i] \leftarrow 0$\;
+        }
+        \For{all $x$ in $M$} {
+            \HashValue$ \leftarrow \mathrm{hash}(x)$\;
+            \Bitmap$[\HashValue \% m] \leftarrow 1$\;
+        }
+        $U_n \leftarrow $ number of "0"s in the \Bitmap \;
+        $V_n \leftarrow U_n/m$ \;
+        $\hat{n} \leftarrow -m\ln{V_n}$ \;
+        \caption{Probablistic Counting}
+    \end{algorithm}
+
+    论文中证明，令 $t = n / m$ ，当 $n, m \to \infty$ 时，有：
+
+    \begin{align*}
+        E(V_n) &= e^{-t} \\
+        Var(V_n) &= \frac1me^{-t}(1-(1+t)e^{-t})
+    \end{align*}
+
+    容易得出，矩估计 $\hat{n} = -m\ln{V_n}$ ，并且可以证明这也是最大似然估计。
+
+    论文中还提到，如果遇到 Bitmap 填满的情况，这个估计将会有比较大的误差，需要重新选择参数，重复一次以上过程。这就是完整的 Linear Counting 算法。
+
+\subsubsection{评价}
+    这个算法采用了和 Flajolet-Martin 算法类似的哈希思路，但得到了来自哈希表的 load factor 启发，设计了这样的算法。它也很容易并行执行，并且最后集中在一处进行最终的估计。局限性在于，为了减小标准差，$m$ 的选取需要从论文中表二进行查表，而不能通过一个简单的公式推算出最优的 $m$ 。
+
 \printbibliography[title=引用文献]
 
 \end{document}
