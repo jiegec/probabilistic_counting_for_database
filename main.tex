@@ -170,10 +170,10 @@
         $U_n \leftarrow $ number of "0"s in the \Bitmap \;
         $V_n \leftarrow U_n/m$ \;
         $\hat{n} \leftarrow -m\ln{V_n}$ \;
-        \caption{Probablistic Counting}
+        \caption{Linear Counting}
     \end{algorithm}
 
-    论文中证明，令 $t = n / m$ ，当 $n, m \to \infty$ 时，有：
+    可以证明\cite{Whang:1990ei}，令 $t = n / m$ ，当 $n, m \to \infty$ 时，有：
 
     \begin{align*}
         E(V_n) &= e^{-t} \\
@@ -205,8 +205,22 @@
             $M^{(j)} \leftarrow \max(M^{(j)}, \rho(b_{k+1}b_{k+2}\cdots))$\;
         }
         $\hat{n} = \alpha_mm2^{\frac1m}\sum_j{M^{(j)}}$\;
-        \caption{Probablistic Counting}
+        \caption{Basic LogLog}
     \end{algorithm}
+
+    这里利用了和 Flajolet-Martin 算法一样的性质，区别在于，根据哈希值的前 $m$ 位二进制，把数据分为 $2^m$ 组，每组分别求出对 $\log_2(n)$ 的估计后进行修正。这里的 $\alpha_m$ 由以下等式给出：
+
+    \begin{equation*}
+        \alpha_m = (\Gamma(-1/m)\frac{1-2^{1/m}}{\log{2}})^{-m}
+    \end{equation*}
+
+    可以证明\cite{Durand:2003je}，这样得到的无偏估计 $\hat{n}$ 满足：
+    \begin{align*}
+        \frac1nE_n(\hat{n}) &= 1 + \theta_{1,n}+\mathrm{o}(1) & \mathrm{where} \quad |\theta_{1,n}| < 10^{-6} \\
+        \frac1n\sqrt{V_n(\hat{n})} &= \frac{\beta_m}{\sqrt{m}} + \theta_{2,m} + \mathrm{0}(1) & \mathrm{where} \quad |\theta_{2,n}| < 10^{-6}
+    \end{align*}
+
+    其中 $\beta_{\infty} = \sqrt{\frac1{12}\log^22+\frac16\pi^2} \approx 1.29806$
 
 \printbibliography[title=引用文献]
 
