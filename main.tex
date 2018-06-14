@@ -202,7 +202,7 @@
         \For{all $x$ in $M$} {
             $x = b_1b_2 \cdots \leftarrow \mathrm{hash}(x)$\;
             $j \leftarrow (b_1\cdots b_k)_2$\;
-            $M^{(j)} \leftarrow \max(M^{(j)}, \rho(b_{k+1}b_{k+2}\cdots))$\;
+            $M^{(j+1)} \leftarrow \max(M^{(j+1)}, \rho(b_{k+1}b_{k+2}\cdots))$\;
         }
         $\hat{n} = \alpha_mm2^{\frac1m}\sum_j{M^{(j)}}$\;
         \caption{Basic LogLog}
@@ -226,7 +226,43 @@
     作者在 LogLog 算法的基础上，提出了改进方案。当得到 $M^{(i)}$ 的结果时，可以选出其中最小的 $\lfloor \theta_0 m \rfloor$ 个元素进行最终的估计，其中 $\theta_0$ 为一个 $0$ 到 $1$ 之间的实数，作者推荐采用 $0.7$。同时，只采用 $[0 \ldots B]$ 中的值，其中 $\lceil \log_2(\frac{N_max}m)+3 \rceil$ ，可以减少存储空间的使用。通过这两个优化，算法的空间使用得到优化，并且标准差从 $1.30/\sqrt{m}$ 降为 $1.05/\sqrt{m}$ 
 
 \subsubsection{评价}
-    这个算法很好地解决了 Flajolet-Martin 算法中需要多次采用不同哈希算法取平均的问题，通过将哈希值分成两段，前半段用于分块，后半段用于估计，最后进行整体修正。同时，这个算法的空间复杂度较小，在面对很大的数据量时，拥有较好的优势。
+    这个算法很好地解决了 Flajolet-Martin 算法中需要多次采用不同哈希算法取平均的问题，通过将哈希值分成两段，前半段用于分块，后半段用于估计，最后进行整体修正。同时，虽然牺牲了一定的精确度，这个算法的空间复杂度较小，在面对很大的数据量时，拥有较好的优势。
+
+\subsection{HyperLogLog 算法 \cite{Flajolet:2007um}}
+    2007年，Flajolet等人在 LogLog 算法的基础上进行改进，提出了 HyperLogLog 的算法，进一步降低了内存占用，同时提高了精确度。算法过程与 LogLog 基本相似，但稍有不同，在最后估计时使用了调和平均。
+
+    \begin{algorithm}
+        \SetKwInOut{Input}{input}
+        \SetKwInOut{Output}{output}
+        \Input{the multiset $M$ whose cardinality is sought}
+        \Output{the estimated $\hat{n}$}
+        \BlankLine
+        \emph{let $\rho(y)$ be the rank of first 1-bit from the left in y}\;
+        $m \leftarrow 2^b$\;
+        $M[1],\ldots ,M[m] \leftarrow 0$\;
+        \For{all $x$ in $M$} {
+            $x = x_1x_2 \cdots \leftarrow \mathrm{hash}(x)$\;
+            $j \leftarrow 1 + (x_1\cdots x_b)_2$\;
+            $M[j] \leftarrow \max(M[j], \rho(b_{k+1}b_{k+2}\cdots))$\;
+        }
+        $Z \leftarrow \left(\sum_{j=1}^m{2^{-M[j]}}\right)^{-1}$\;
+        $\hat{n} = \alpha_mm^2Z$\;
+        \caption{Basic LogLog}
+    \end{algorithm}
+
+    其中：
+    \begin{align*}
+        \hat{n} &= \frac{\alpha_mm^2}{\sum_{i=1}^m2^{-M[j]}} \\
+        \alpha_m &= \left(m\int_0^{\infty}\left(\log_2{\frac{2+u}{1+u}}\right)^m\mathrm{d}u\right)^{-1}
+    \end{align*}
+
+    论文中也给出了 $\alpha_m$ 的一些数据和近似计算公式： $\alpha_{16} = 0.673$ ； $\alpha_{32} = 0.697$ ； $\alpha_{64} = 0.709$； $\alpha_m=0.7213/(1+1.079/m) (m \ge 128)$ 。同时，还对不同范围的 $n$ 进行了特殊处理：当范围过小或者范围过大时，需要进一步的修正，最终达到 $1.04/\sqrt{m}$ 的标准差。
+
+\subsubsection{HyperLogLog++ 算法 \cite{40671}}
+    2013 年，Stefan Heule，Marc Numkesser和Alexannder Hall提出了HyperLogLog的进一步改进算法 HyperLogLog++。它直接采用 64 位的哈希函数，足以解决大多数数据规模；在小数据集上，HyperLogLog++ 添加了一定的启发性，在数据很小的时候采用更精确的 Linear Counting 算法。同时，通过稀疏表示法，进一步减少了空间的消耗。
+
+\section{总结}
+    解决这个问题的 Flajolet-Martin 算法从 1985 年提出，经过多次改进和优化，最终得到了现在在数据库中得到广泛应用的 HyperLogLog 算法。HyperLogLog 算法并不是最优的，2010年，Daniel M Kane 等人提出了解决这个问题的最优解，但由于其实现的复杂性，其广泛性不及 HyperLogLog 算法。\cite{Kane:2010fp} 这些算法很好地利用了哈希函数的概率分布性质，将概率统计理论与计算机科学结合，是一个优秀的结合的例子。对于解决这个问题的其它方法，出于篇幅和实践中的使用较少，不予介绍。
 
 \printbibliography[title=引用文献]
 
