@@ -220,7 +220,13 @@
         \frac1n\sqrt{V_n(\hat{n})} &= \frac{\beta_m}{\sqrt{m}} + \theta_{2,m} + \mathrm{0}(1) & \mathrm{where} \quad |\theta_{2,n}| < 10^{-6}
     \end{align*}
 
-    其中 $\beta_{\infty} = \sqrt{\frac1{12}\log^22+\frac16\pi^2} \approx 1.29806$
+    其中 $\beta_{\infty} = \sqrt{\frac1{12}\log^22+\frac16\pi^2} \approx 1.29806$ ，由此可得 $\alpha_{\infty} = \mathrm{e}^{-\gamma}\sqrt2/2 \approx 0.39701$
+
+\subsubsection{Super Loglog}
+    作者在 LogLog 算法的基础上，提出了改进方案。当得到 $M^{(i)}$ 的结果时，可以选出其中最小的 $\lfloor \theta_0 m \rfloor$ 个元素进行最终的估计，其中 $\theta_0$ 为一个 $0$ 到 $1$ 之间的实数，作者推荐采用 $0.7$。同时，只采用 $[0 \ldots B]$ 中的值，其中 $\lceil \log_2(\frac{N_max}m)+3 \rceil$ ，可以减少存储空间的使用。通过这两个优化，算法的空间使用得到优化，并且标准差从 $1.30/\sqrt{m}$ 降为 $1.05/\sqrt{m}$ 
+
+\subsubsection{评价}
+    这个算法很好地解决了 Flajolet-Martin 算法中需要多次采用不同哈希算法取平均的问题，通过将哈希值分成两段，前半段用于分块，后半段用于估计，最后进行整体修正。同时，这个算法的空间复杂度较小，在面对很大的数据量时，拥有较好的优势。
 
 \printbibliography[title=引用文献]
 
